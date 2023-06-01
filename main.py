@@ -12,9 +12,6 @@ import math
 
 app = FastAPI()
 matplotlib.use('agg')
-@app.get("/")
-def read_root():
-    return {"Hello": "World"}
 path_fig = "fig.png"
 path_paint = "paint_gif.png"
 @app.post("/show_graph")
