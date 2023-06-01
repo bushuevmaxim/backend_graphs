@@ -32,7 +32,7 @@ def show_graph(graph: List[List[int]]):
     nx.draw_circular(G, node_color='brown',font_color = "whitesmoke", node_size=1000,font_size=22, with_labels=True)
     plt.savefig(path_fig, format="PNG")
     plt.clf()
-    return FileResponse(path=path_fig)
+    return FileResponse(path=path_fig, media_type="image/png")
 @app.post("/test")
 def test(graph: List[List[int]]):
     G = nx.Graph(np.matrix(graph), create_using=nx.Graph)
