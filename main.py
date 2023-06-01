@@ -30,5 +30,5 @@ def paint_graph(graph: List[List[int]]):
     return FileResponse(path=path_paint)
 
 def paint_graph(graph:List[List[int]]):
-
+    pass
     
