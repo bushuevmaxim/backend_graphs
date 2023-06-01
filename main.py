@@ -42,7 +42,8 @@ def test(graph: List[List[int]]):
     my_stringIObytes = io.BytesIO()
     plt.savefig(my_stringIObytes, format='jpg')
     my_stringIObytes.seek(0)
-    my_base64_jpgData = base64.b64encode(my_stringIObytes.read()).decode()
+    my_base64_jpgData = base64.b64encode(my_stringIObytes.read())
+    print(my_base64_jpgData)
     data = {"img": my_base64_jpgData}
     json_data = jsonable_encoder(data)
     return JSONResponse(content=json_data)
