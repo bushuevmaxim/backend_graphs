@@ -9,21 +9,9 @@ import matplotlib
 import random
 import math
 from fastapi.middleware.cors import CORSMiddleware
-
-matrix = [[0,1,0,1,1,0,0,1,0,1],
-     [1,0,1,0,0,1,0,0,1,0],
-     [0,1,0,0,0,0,0,1,0,0],
-     [1,0,0,0,1,0,1,0,0,0],
-     [1,0,0,1,0,0,0,0,0,0],
-     [0,1,0,0,0,0,0,0,1,0],
-     [0,0,0,1,0,0,0,1,1,1],
-     [1,0,1,0,0,0,1,0,1,0],
-     [0,1,0,0,0,1,1,1,0,0],
-     [1,0,0,0,0,0,1,0,0,0]]
 app = FastAPI()
 origins = ["*"]
 
-# Добавляем middleware для CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -49,92 +37,49 @@ def paint_graph(graph: List[List[int]]):
     nx.draw_circular(G, node_color=colorlist,font_color = "black", node_size=1000,font_size=22, with_labels=True)
     plt.savefig(path_paint, format="PNG")
     plt.clf()
-    headers = {"Count": len(set(colorlist))}
+    headers = {"Count": str(len(set(colorlist)))}
     return FileResponse(path=path_paint, headers=headers)
 
 def paint_graph(graph:List[List[int]]):
-    return simulated_annealing(graph, temperature=100 , cooling_rate=0.95).values()
+    return simulated_annealing(graph, initial_temperature=100 , cooling_rate=0.95)
     
-    
 
-import random
-import math
+def simulated_annealing(adjacency_matrix, initial_temperature, cooling_rate):
+    num_nodes = len(adjacency_matrix)
+    current_solution = initialize_solution(num_nodes)  
+    current_cost = calculate_cost(adjacency_matrix, current_solution) 
+    temperature = initial_temperature
 
-def initialize_colors(graph):
-    """
-    Initialize random colors for each node in the graph.
-    Colors are represented as integers ranging from 1 to the maximum degree of the graph.
-    """
-    colors = {}
-    num_nodes = len(graph)
-    for node in range(num_nodes):
-        colors[node] = random.randint(1, max_degree(graph))
-    return colors
+    while temperature > 0.1:  
+        for i in range(100): 
+            new_solution = generate_neighbor_solution(current_solution)
+            new_cost = calculate_cost(adjacency_matrix, new_solution) 
 
-def max_degree(graph):
-    """
-    Calculate and return the maximum degree among all nodes in the graph.
-    """
-    max_degree = 0
-    num_nodes = len(graph)
-    for node in range(num_nodes):
-        degree = sum(graph[node])
-        if degree > max_degree:
-            max_degree = degree
-    return max_degree
+            if new_cost < current_cost:
+                current_solution = new_solution
+                current_cost = new_cost
+            num_colors_used = len(set(current_solution))
+            if num_colors_used == num_nodes and current_cost == 0:
+                return current_solution
+        temperature *= cooling_rate
 
-def calculate_cost(graph, colors):
-    """
-    Calculate the total number of conflicts (edges between nodes of the same color) in the graph for a given coloring.
-    """
+    return current_solution
+
+def initialize_solution(num_nodes):
+    solution = [-1] * num_nodes
+    return solution
+
+def calculate_cost(adjacency_matrix, solution):
     cost = 0
-    num_nodes = len(graph)
-    for node in range(num_nodes):
-        node_color = colors[node]
-        for neighbor in range(num_nodes):
-            if graph[node][neighbor] == 1 and colors[neighbor] == node_color:
+    num_nodes = len(adjacency_matrix)
+    for i in range(num_nodes):
+        for j in range(i + 1, num_nodes):
+            if adjacency_matrix[i][j] == 1 and solution[i] == solution[j]:
                 cost += 1
     return cost
 
-def kempe_chain_swap(colors, node_a, node_b):
-    """
-    Perform a Kempe chain swap between two nodes in the coloring.
-    Swap the colors of nodes that have either color color_a or color_b.
-    """
-    color_a = colors[node_a]
-    color_b = colors[node_b]
-    for node in colors:
-        if colors[node] == color_a:
-            colors[node] = color_b
-        elif colors[node] == color_b:
-            colors[node] = color_a
-
-def simulated_annealing(graph, temperature, cooling_rate):
-    """
-    Implement the simulated annealing algorithm to find an optimal coloring for the graph.
-    """
-    num_nodes = len(graph)
-    current_solution = initialize_colors(graph)
-    best_solution = current_solution.copy()
-    current_cost = calculate_cost(graph, current_solution)
-    best_cost = current_cost
-
-    while temperature > 0.01:
-        new_solution = current_solution.copy()
-        node_a = random.randint(0, num_nodes - 1)
-        node_b = random.randint(0, num_nodes - 1)
-
-        kempe_chain_swap(new_solution, node_a, node_b)
-        new_cost = calculate_cost(graph, new_solution)
-
-        if new_cost < current_cost or math.exp((current_cost - new_cost) / temperature) > random.random():
-            current_solution = new_solution
-            current_cost = new_cost
-
-        if new_cost < best_cost:
-            best_solution = new_solution
-            best_cost = new_cost
-
-        temperature *= cooling_rate
-
-    return best_solution
+def generate_neighbor_solution(solution):
+    new_solution = solution.copy()
+    node = random.randint(0, len(solution) - 1)
+    new_solution[node] = random.randint(0, max(solution) + 1)
+    return new_solution
