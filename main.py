@@ -25,21 +25,20 @@ matplotlib.use('agg')
 path_fig = "fig.png"
 path_paint = "paint_gif.png"
 @app.post("/show_graph")
-def show_graph(graph: List[List[int]] = matrix):
-    G = nx.DiGraph(np.array(graph))
+def show_graph(graph: List[List[int]]):
+    G = nx.Graph(np.matrix(graph), create_using=nx.Graph)
     nx.draw_circular(G, node_color='brown',font_color = "whitesmoke", node_size=1000,font_size=22, with_labels=True)
-    plt.show(block=False)
     plt.savefig(path_fig, format="PNG")
+    plt.clf()
     return FileResponse(path=path_fig)
 
 @app.post("/paint_graph")
-def paint_graph(graph: List[List[int]]= matrix):
-    G = nx.DiGraph(np.array(graph))
+def paint_graph(graph: List[List[int]]):
+    G = nx.Graph(np.matrix(graph), create_using=nx.Graph)
     colorlist = list(paint_graph(graph))
-    print(colorlist)
     nx.draw_circular(G, node_color=colorlist,font_color = "black", node_size=1000,font_size=22, with_labels=True)
-    plt.show(block=False)
     plt.savefig(path_paint, format="PNG")
+    plt.clf()
     return FileResponse(path=path_paint)
 
 def paint_graph(graph:List[List[int]]):
