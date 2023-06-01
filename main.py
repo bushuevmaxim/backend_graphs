@@ -10,12 +10,22 @@ import matplotlib
 import random
 import math
 
+matrix = [[0,1,0,1,1,0,0,1,0,1],
+     [1,0,1,0,0,1,0,0,1,0],
+     [0,1,0,0,0,0,0,1,0,0],
+     [1,0,0,0,1,0,1,0,0,0],
+     [1,0,0,1,0,0,0,0,0,0],
+     [0,1,0,0,0,0,0,0,1,0],
+     [0,0,0,1,0,0,0,1,1,1],
+     [1,0,1,0,0,0,1,0,1,0],
+     [0,1,0,0,0,1,1,1,0,0],
+     [1,0,0,0,0,0,1,0,0,0]]
 app = FastAPI()
 matplotlib.use('agg')
 path_fig = "fig.png"
 path_paint = "paint_gif.png"
 @app.post("/show_graph")
-def show_graph(graph: List[List[int]]):
+def show_graph(graph: List[List[int]] = matrix):
     G = nx.DiGraph(np.array(graph))
     nx.draw_circular(G, node_color='brown',font_color = "whitesmoke", node_size=1000,font_size=22, with_labels=True)
     plt.show(block=False)
@@ -23,7 +33,7 @@ def show_graph(graph: List[List[int]]):
     return FileResponse(path=path_fig)
 
 @app.post("/paint_graph")
-def paint_graph(graph: List[List[int]]):
+def paint_graph(graph: List[List[int]]= matrix):
     G = nx.DiGraph(np.array(graph))
     colorlist = list(paint_graph(graph))
     print(colorlist)
