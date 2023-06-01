@@ -6,9 +6,9 @@ from fastapi.responses import FileResponse
 import networkx as nx
 import matplotlib.pyplot as plt
 import matplotlib 
-
 import random
 import math
+from fastapi.middleware.cors import CORSMiddleware
 
 matrix = [[0,1,0,1,1,0,0,1,0,1],
      [1,0,1,0,0,1,0,0,1,0],
@@ -21,6 +21,20 @@ matrix = [[0,1,0,1,1,0,0,1,0,1],
      [0,1,0,0,0,1,1,1,0,0],
      [1,0,0,0,0,0,1,0,0,0]]
 app = FastAPI()
+origins = [
+    "http://localhost.tiangolo.com",
+    "https://localhost.tiangolo.com",
+    "http://localhost",
+    "http://localhost:8080",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 matplotlib.use('agg')
 path_fig = "fig.png"
 path_paint = "paint_gif.png"
@@ -39,7 +53,8 @@ def paint_graph(graph: List[List[int]]):
     nx.draw_circular(G, node_color=colorlist,font_color = "black", node_size=1000,font_size=22, with_labels=True)
     plt.savefig(path_paint, format="PNG")
     plt.clf()
-    return FileResponse(path=path_paint)
+    headers = {"Count": len(set(colorlist))}
+    return FileResponse(path=path_paint, headers=headers)
 
 def paint_graph(graph:List[List[int]]):
     return simulated_annealing(graph, temperature=100 , cooling_rate=0.95).values()
