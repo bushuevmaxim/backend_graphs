@@ -1,3 +1,5 @@
+import base64
+import io
 from typing import List
 from fastapi import FastAPI
 import numpy as np
@@ -8,6 +10,8 @@ import matplotlib.pyplot as plt
 import matplotlib 
 import random
 import math
+from fastapi.responses import JSONResponse
+from fastapi.encoders import jsonable_encoder
 from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI()
 origins = ["*"]
@@ -29,7 +33,19 @@ def show_graph(graph: List[List[int]]):
     plt.savefig(path_fig, format="PNG")
     plt.clf()
     return FileResponse(path=path_fig)
-
+@app.post("/test")
+def test(graph: List[List[int]]):
+    G = nx.Graph(np.matrix(graph), create_using=nx.Graph)
+    nx.draw_circular(G, node_color='brown',font_color = "whitesmoke", node_size=1000,font_size=22, with_labels=True)
+    plt.savefig(path_fig, format="PNG")
+    plt.clf()
+    my_stringIObytes = io.BytesIO()
+    plt.savefig(my_stringIObytes, format='jpg')
+    my_stringIObytes.seek(0)
+    my_base64_jpgData = base64.b64encode(my_stringIObytes.read()).decode()
+    data = {"img": my_base64_jpgData}
+    json_data = jsonable_encoder(data)
+    return JSONResponse(content=json_data)
 @app.post("/paint_graph")
 def paint_graph(graph: List[List[int]]):
     G = nx.Graph(np.matrix(graph), create_using=nx.Graph)
