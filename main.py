@@ -21,13 +21,9 @@ matrix = [[0,1,0,1,1,0,0,1,0,1],
      [0,1,0,0,0,1,1,1,0,0],
      [1,0,0,0,0,0,1,0,0,0]]
 app = FastAPI()
-origins = [
-    "http://localhost.tiangolo.com",
-    "https://localhost.tiangolo.com",
-    "http://localhost",
-    "http://localhost:8080",
-]
+origins = ["*"]
 
+# Добавляем middleware для CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
