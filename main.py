@@ -32,19 +32,20 @@ def show_graph(graph: List[List[int]]):
     nx.draw_circular(G, node_color='brown',font_color = "whitesmoke", node_size=1000,font_size=22, with_labels=True)
     plt.savefig(path_fig, format="png")
     plt.clf()
-    return FileResponse(path=path_fig, media_type="image/png")
+    with open(path_fig, "rb") as img_file:
+        b64_string = base64.b64encode(img_file.read())
+    data = {"img": b64_string}
+    json_data = jsonable_encoder(data)
+    return JSONResponse(content=json_data)
 @app.post("/test")
 def test(graph: List[List[int]]):
     G = nx.Graph(np.matrix(graph), create_using=nx.Graph)
     nx.draw_circular(G, node_color='brown',font_color = "whitesmoke", node_size=1000,font_size=22, with_labels=True)
     plt.savefig(path_fig, format="PNG")
     plt.clf()
-    my_stringIObytes = io.BytesIO()
-    plt.savefig(my_stringIObytes, format='jpg')
-    my_stringIObytes.seek(0)
-    my_base64_jpgData = base64.b64encode(my_stringIObytes.read())
-    print(my_base64_jpgData)
-    data = {"img": my_base64_jpgData}
+    with open(path_fig, "rb") as img_file:
+        b64_string = base64.b64encode(img_file.read())
+    data = {"img": b64_string, "count": {4}}
     json_data = jsonable_encoder(data)
     return JSONResponse(content=json_data)
 @app.post("/paint_graph")
@@ -54,8 +55,12 @@ def paint_graph(graph: List[List[int]]):
     nx.draw_circular(G, node_color=colorlist,font_color = "black", node_size=1000,font_size=22, with_labels=True)
     plt.savefig(path_paint, format="PNG")
     plt.clf()
-    headers = {"Count": str(len(set(colorlist)))}
-    return FileResponse(path=path_paint, headers=headers)
+    with open(path_paint, "rb") as img_file:
+        b64_string = base64.b64encode(img_file.read())
+    
+    data = {"img": b64_string, "count": str(len(set(colorlist)))}
+    json_data = jsonable_encoder(data)
+    return JSONResponse(content=json_data)
 
 def paint_graph(graph:List[List[int]]):
     return simulated_annealing(graph, initial_temperature=100 , cooling_rate=0.95)
