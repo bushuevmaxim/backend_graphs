@@ -49,9 +49,9 @@ def test(graph: List[List[int]]):
     json_data = jsonable_encoder(data)
     return JSONResponse(content=json_data)
 @app.post("/paint_graph")
-def paint_graph(graph: List[List[int]]):
+def paint_graph(graph: List[List[int]], temperature: float, cooling_rate: float):
     G = nx.Graph(np.matrix(graph), create_using=nx.Graph)
-    colorlist = list(paint_graph(graph))
+    colorlist = list(paint_graph(graph,temperature, cooling_rate ))
     nx.draw_circular(G, node_color=colorlist,font_color = "black", node_size=1000,font_size=22, with_labels=True)
     plt.savefig(path_paint, format="PNG")
     plt.clf()
@@ -62,8 +62,8 @@ def paint_graph(graph: List[List[int]]):
     json_data = jsonable_encoder(data)
     return JSONResponse(content=json_data)
 
-def paint_graph(graph:List[List[int]]):
-    return simulated_annealing(graph, initial_temperature=100 , cooling_rate=0.95)
+def paint_graph(graph:List[List[int]], initial_temperature, cooling_rate):
+    return simulated_annealing(graph, initial_temperature, cooling_rate)
     
 
 def simulated_annealing(adjacency_matrix, initial_temperature, cooling_rate):
